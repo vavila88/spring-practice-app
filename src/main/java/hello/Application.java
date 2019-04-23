@@ -7,10 +7,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class Application {
+
+    // predicate (lambda function) used to show how we can encapsulate a
+    // function in a variable. declared static because it's used in a static
+    // function
+    public final static Predicate<String> filterBs = (n -> n.contains("b") ||
+                                                    n.contains("s") ||
+                                                    n.contains("B") ||
+                                                    n.contains("S"));
 
     public static void main(String[] args) {
         // Launches this class as a web application with the bundled web server. Will
@@ -37,26 +46,33 @@ public class Application {
         exPickNames(friends);
     }
 
+    /**
+     * Pick names from the input list based on a filter;
+     *      - only pick names with b's or s's in them
+     *      -
+     * @param friends
+     */
     public static void exPickNames(List<String> friends) {
 
-        System.out.println("Functioanlly filtering names that contain B's or S's (ignoring case)");
+        System.out.println("Functionally filtering names that contain B's or S's (ignoring case)");
         // Just do it the functional way, I think I get the gist of it now.
         List<String> bsNames =
                 friends.stream()
-                       .filter(n -> n.contains("b") ||
-                               n.contains("s") ||
-                               n.contains("B") ||
-                               n.contains("S"))
+                       .filter(filterBs)
                         .map(String::toUpperCase)
-                        .map(Application::practiceMethod)
+                        .map(Application::printLength)
                         .collect(Collectors.toList());
     }
 
+    /**
+     * function used to capitalize the strings in the input list both imperatively (old-style) and
+     * declaratively (functional) using method references
+     * @param friends
+     */
     public static void exCapNames(List<String> friends) {
-
         // Old way
         System.out.println("Capitalize contents of input with enhanced for-loop");
-        final List<String> oldCaps = new ArrayList<String>();
+        final List<String> oldCaps = new ArrayList<>();
         for (String n : friends) {
             oldCaps.add(n.toUpperCase());
         }
@@ -67,12 +83,17 @@ public class Application {
         System.out.println("Capitalize contents of input with functional programming");
         final List<String> funcCaps = friends.stream()
                                                 .map(String::toUpperCase)
-                                                .map(Application::practiceMethod)
+                                                .map(Application::printLength)
                                                 .collect(Collectors.toList());
 
         funcCaps.stream().forEach(System.out::println);
     }
 
+    /**
+     * function used to practice the difference between using old-school declarative accessing of
+     * the input list vs using functional programming with the .forEach() method.
+     * @param friends
+     */
     public static void exPrintNames(List<String> friends) {
 
         System.out.println("Printing names using an enhanced for-loop");
@@ -94,6 +115,9 @@ public class Application {
         friends.stream().forEach(System.out::println);
     }
 
+    /**
+     * function used to practice lazy invocation of intermediate operations
+     */
     public static void lazyInvocation() {
         List<String> list = Arrays.asList("abc1", "abc2d", "abc3");
 
@@ -116,7 +140,9 @@ public class Application {
                 .findFirst();
     }
 
-    // Method used to test different aspects of functional programming using streams.
+    /**
+     * Method used to test different aspects of functional programming using streams.
+     */
     public static void testStreams() {
         // simple list to stream from
         List<String> list = Arrays.asList("abc1", "abc2d", "abc3");
@@ -132,18 +158,17 @@ public class Application {
                 .skip(1)
                 .filter(element -> element.length() < 5)
                 .map(element -> element.substring(0, 3))
-                .sorted()
                 .count();
         System.out.println(size);
     }
 
     /**
      * practiceMethod - A practice static method used when learning functional programming in Java. Prints the length
-     *                  of the input string
+     *                  of the input string. Accessed via method referencing
      * @param n - input string to check length on
      * @return the same input string
      */
-    public static String practiceMethod(final String n) {
+    public static String printLength(final String n) {
         System.out.printf("Length of %s - %d\n", n, n.length());
         return n;
     }
