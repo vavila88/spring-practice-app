@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,59 @@ public class Application {
 
         // pick names from the list based on some criteria
         exPickNames(friends);
+
+        // pick names using terse lexical scoping and refactored lexical scoping
+        exPickNamesScoped(friends);
+    }
+
+    private static void exPickNamesScoped(List<String> friends) {
+
+        System.out.println("Filtering names that contain B's or S's using lexical scoping");
+
+        long numB = friends.stream()
+                            .filter(hasLetter("B"))
+                            .map(Application::printLength)
+                            .count();
+        System.out.printf("input has %d entries with %s in it\n", numB, "B");
+
+        long numS = friends.stream()
+                            .filter(hasLetter("S"))
+                            .map(Application::printLength)
+                            .count();
+        System.out.printf("input has %d entries with %s in it\n", numS, "S");
+
+        // Now we do the same thing except we remove the static code smell and use a local function
+        // using the Function class
+        final Function<String, Predicate<String>> hasCharLambda =
+                letter -> name -> name.contains(letter);
+        /*
+        a more verbose way of doing the above; this time we explicitly declare the types for letter and name
+        final Function<String, Predicate<String>> hasCharLambda =
+                (String letter) -> (String name) -> name.contains(letter);
+
+        an even more verbose way of doing the above, in this case we explicitly encapsulate the scope of the nested
+        predicate
+        final Function<String, Predicate<String>> hasCharLambda =
+                (String letter) -> {
+                    Predicate<String> checkPredicate =
+                        (String name) -> name.contains(letter);
+                    return checkPredicate(letter);
+                }
+         */
+
+        System.out.println("Perform the same thing but using the ");
+        long numB2 = friends.stream()
+                .filter(hasCharLambda.apply("B"))
+                .map(Application::printLength)
+                .count();
+        System.out.printf("input has %d entries with %s in it\n", numB, "B");
+
+        long numS2 = friends.stream()
+                .filter(hasCharLambda.apply("S"))
+                .map(Application::printLength)
+                .count();
+        System.out.printf("input has %d entries with %s in it\n", numS, "S");
+
     }
 
     /**
@@ -171,5 +225,17 @@ public class Application {
     public static String printLength(final String n) {
         System.out.printf("Length of %s - %d\n", n, n.length());
         return n;
+    }
+
+    /**
+     * predicate to check if a string contains letter. This pattern is preferred over calling
+     * filter with the same lambda that only changes a single letter; decrease raw character count.
+     *
+     * This pattern still has issues, namely, we create a static method for this single purpose.
+     * @param letter
+     * @return
+     */
+    public static Predicate<String> hasLetter(String letter) {
+        return name -> name.contains(letter);
     }
 }

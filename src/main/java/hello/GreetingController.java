@@ -33,7 +33,7 @@ public class GreetingController {
     @RequestMapping("/greeting/quote")
     public Greeting greetingWithQuote(@RequestParam(value="name", defaultValue="world") String name) {
         // RestTemplate object is used to map the contents of a JSON payload directly to a domain object.
-        // In this case we mapp the random quote json to our object representation
+        // In this case we map the random quote json to our object representation
         RestTemplate restTemplate = new RestTemplate();
 
         // Call the url provided and create the specified object type form the results
